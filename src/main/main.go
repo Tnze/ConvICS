@@ -6,11 +6,14 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+	"path"
 	"time"
 )
 
 func main() {
 	fileName := os.Args[1] //文件名
+	fmt.Println(path.Ext(fileName))
+
 	file, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		panic(fmt.Errorf("读文件%s失败: %v", fileName, err))
