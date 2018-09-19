@@ -12,7 +12,9 @@ import (
 
 func main() {
 	fileName := os.Args[1] //文件名
-	fmt.Println(path.Ext(fileName))
+	if path.Ext(fileName) != ".yml" {
+		panic(fmt.Errorf("应该是一个yml文件！"))
+	}
 
 	file, err := ioutil.ReadFile(fileName)
 	if err != nil {

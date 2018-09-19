@@ -1,0 +1,198 @@
+classes: 
+  - 
+    time: 一二
+    day: 1
+    name: C语言程序设计
+    teacher: 张市芳
+    week: 
+      - 10
+      - 18
+    location: 教2-505(未央)
+  - 
+    time: 一二
+    day: 3
+    name: 思想道德修养与法律基础
+    teacher: 李小雁
+    week: 
+      - 4
+      - 18
+    location: 教2-308(未央)
+  - 
+    time: 一二
+    day: 4
+    name: 高等数学AⅠ
+    teacher: 李艳艳
+    week: 
+      - 4
+      - 18
+    location: 教1-401(未央)
+  - 
+    time: 一二
+    day: 5
+    name: 计算机导论
+    teacher: 杨博
+    week: 
+      - 4
+      - 11
+    location: 教2-512(未央)
+  - 
+    time: 三四
+    day: 1
+    name: 高等数学AⅠ
+    teacher: 李艳艳
+    week: 
+      - 4
+      - 18
+    location: 教1-402(未央)
+  - 
+    time: 三四
+    day: 2
+    name: 军事理论
+    teacher: 张俊
+    week: 
+      - 4
+      - 15
+    location: 教1-205(未央)
+  - 
+    time: 三四
+    day: 4
+    name: 大学英语Ⅰ
+    teacher: 王亚军
+    week: 
+      - 4
+      - 18
+    location: 教5-209(未央)
+  - 
+    time: 三四
+    day: 5
+    name: 高等数学AⅠ
+    teacher: 李艳艳
+    week: 
+      - 4
+      - 17
+    location: 教1-401(未央)
+  - 
+    time: 五六
+    day: 2
+    name: 大学英语Ⅰ
+    teacher: 王亚军
+    week: 
+      - 4
+      - 18
+    location: 教3-103(未央)
+  - 
+    time: 五六
+    day: 3
+    name: C语言程序设计
+    teacher: 张市芳
+    week: 
+      - 4
+      - 18
+    location: 教2-512(未央)
+  - 
+    time: 五六
+    day: 4
+    name: 羽毛球Ⅰ
+    teacher: 刘洁
+    week: 
+      - 4
+      - 19
+    location: 未央操场14(未央)
+  - 
+    time: 七八
+    day: 1
+    name: 思想道德修养与法律基础
+    teacher: 李小雁
+    week: 
+      - 14
+      - 18
+    location: 教2-304(未央)
+  - 
+    time: 七八
+    day: 2
+    name: 大学生职业发展与教育Ⅰ
+    teacher: 崔弘
+    week: 
+      - 4
+      - 13
+    location: 教2-402(未央)
+  - 
+    time: 七八
+    day: 3
+    name: 计算机导论
+    teacher: 杨博
+    week: 
+      - 4
+      - 11
+    location: 教2-505(未央)
+  - 
+    time: 七八
+    day: 5
+    name: 大学英语Ⅰ
+    teacher: 王亚军
+    week: 
+      - 17
+      - 18
+    location: 教3-307(未央)
+  - 
+    time: 九十十一
+    day: 1
+    name: 智能小车及其控制技术
+    teacher: 褚渊博
+    week: 
+      - 4
+      - 11
+    location: 教3-306(未央)
+schedule: 
+  早读: #课名
+    - 0720:00+08
+    - 0750:00+08
+  一: 
+    - 080000+08
+    - 085000+08
+  二: 
+    - 090000+08
+    - 095000+08
+  一二: 
+    - 080000+08 
+    - 095000+08 
+  三: 
+    - 101000+08
+    - 110000+08
+  四: 
+    - 111000+08
+    - 120000+08
+  三四: 
+    - 101000+08
+    - 120000+08
+  五: 
+    - 140000+08
+    - 145000+08
+  六: 
+    - 150000+08
+    - 155000+08
+  五六: 
+    - 140000+08
+    - 155000+08
+  七: 
+    - 161000+08
+    - 170000+08
+  八: 
+    - 171000+08
+    - 180000+08
+  七八: 
+    - 161000+08 
+    - 180000+08
+  九: 
+    - 193000+08
+    - 202000+08
+  十:
+    - 203000+08
+    - 212000+08
+  九十十一:
+    - 193000+08
+    - 212000+08
+  晚修: 
+    - 213000+08
+    - 222000+08
+firstWeek: 20180902
