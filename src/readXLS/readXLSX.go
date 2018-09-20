@@ -1,4 +1,4 @@
-package main
+package readXLS
 
 import (
 	"fmt"
@@ -6,16 +6,12 @@ import (
 	//"gopkg.in/yaml.v2"
 	"github.com/tealeg/xlsx"
 	"os"
-	"path"
 	//"time"
 	"strings"
 )
 
-func main() {
-	fileName := os.Args[1] //文件名
-	if path.Ext(fileName) != ".xlsx" {
-		panic(fmt.Errorf("只支持xlsx文件！"))
-	}
+//DoXLSX 把xlsx文件转换为yml格式的课程
+func DoXLSX(fileName string) {
 
 	file, err := xlsx.OpenFile(fileName)
 	if err != nil {
@@ -63,6 +59,7 @@ func main() {
 					yml += "      - " + times[0] + "\n"
 					yml += "      - " + times[1] + "\n"
 					yml += "    location: " + timeLocs[1] + "\n"
+					yml += "    code: " + cut(f[1]) + "\n" //课程编号
 				}
 			}
 		}

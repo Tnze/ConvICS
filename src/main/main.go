@@ -7,15 +7,26 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"readXLS"
 	"time"
 )
 
 func main() {
 	fileName := os.Args[1] //文件名
-	if path.Ext(fileName) != ".yml" {
-		panic(fmt.Errorf("应该是一个yml文件！"))
+	switch path.Ext(fileName) {
+	case ".yml":
+		doYML(fileName)
+	case ".xlsx":
+		readXLS.DoXLSX(fileName)
+	case ".xls":
+		panic(fmt.Errorf("请先将xls文件另存为xlsx文件"))
+	default:
+		panic(fmt.Errorf("只能处理yml或xlsx文件！"))
 	}
 
+}
+
+func doYML(fileName string) {
 	file, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		panic(fmt.Errorf("读文件%s失败: %v", fileName, err))
@@ -38,7 +49,7 @@ func main() {
 		for j := s.Classes[i].Week[0] - 1; j < s.Classes[i].Week[1]; j++ {
 			start := st.AddDate(0, 0, 7*j+s.Classes[i].Day)
 			end := en.AddDate(0, 0, 7*j+s.Classes[i].Day)
-			ics += icsEvent(start, end, s.Classes[i].Name)
+			ics += icsEvent(start, end, s.Classes[i])
 		}
 	}
 	ics += icsEnd()
@@ -68,6 +79,7 @@ type Class struct {
 	Teacher  string `yaml:"teacher"`
 	Week     [2]int `yaml:"week"`
 	Location string `yaml:"location"`
+	Code     string `yaml:"code"`
 }
 
 func icsHand() string {
@@ -81,11 +93,13 @@ func icsEnd() string {
 	return "END:VCALENDAR"
 }
 
-func icsEvent(start, end time.Time, summary string) string {
-	return fmt.Sprintf("BEGIN:VEVENT\nUID:%s\nDTSTAMP:19970714T170000Z\nDTSTART:%s\nDTEND:%s\nSUMMARY:%s\nEND:VEVENT\n",
+func icsEvent(start, end time.Time, c Class) string {
+	return fmt.Sprintf("BEGIN:VEVENT\nUID:%s\nDTSTAMP:19970714T170000Z\nDTSTART:%s\nDTEND:%s\nSUMMARY:%s\nLOCATION:%s\nDESCRIPTION:%s\nEND:VEVENT\n",
 		uuid.Must(uuid.NewV4()),
 		start.UTC().Format("20060102T150405Z"),
 		end.UTC().Format("20060102T150405Z"),
-		summary,
+		c.Name,
+		c.Location,
+		"编号："+c.Code+"   教师："+c.Teacher,
 	)
 }
