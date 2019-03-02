@@ -12,12 +12,20 @@ import (
 )
 
 func main() {
-	fileName := os.Args[1] //文件名
+	var fileName string
+	if len(os.Args) > 1 {
+		fileName = os.Args[1] //文件名
+	} else {
+		fmt.Print("请输入文件名: ")
+		fmt.Scan(&fileName)
+	}
 	switch path.Ext(fileName) {
 	case ".yml":
 		doYML(fileName)
+		fmt.Println("成功")
 	case ".xlsx":
 		readXLS.DoXLSX(fileName)
+		fmt.Println("成功")
 	case ".xls":
 		panic(fmt.Errorf("请先将xls文件另存为xlsx文件"))
 	default:
@@ -31,7 +39,7 @@ func doYML(fileName string) {
 	if err != nil {
 		panic(fmt.Errorf("读文件%s失败: %v", fileName, err))
 	}
-	var s Schedule
+	var s schedule
 	yaml.Unmarshal(file, &s)
 	//fmt.Print(s)
 
@@ -40,6 +48,10 @@ func doYML(fileName string) {
 	for i := 0; i < len(s.Classes); i++ {
 		st, err := time.Parse("20060102T150405-07", s.FirstWeek+"T"+s.Timetable[s.Classes[i].Time][0])
 		if err != nil {
+			fmt.Println(s.Timetable[s.Classes[i].Time][0])
+			fmt.Println(s.Timetable[s.Classes[i].Time])
+			fmt.Println(s.Timetable)
+			fmt.Println(s.Classes[i].Time)
 			panic(err)
 		}
 		en, err := time.Parse("20060102T150405-07", s.FirstWeek+"T"+s.Timetable[s.Classes[i].Time][1])
@@ -66,13 +78,13 @@ func doYML(fileName string) {
 	}
 }
 
-type Schedule struct {
-	Classes   []Class              `yaml:"classes"`
+type schedule struct {
+	Classes   []lesson             `yaml:"classes"`
 	Timetable map[string][2]string `yaml:"schedule"`
 	FirstWeek string               `yaml:"firstWeek"`
 }
 
-type Class struct {
+type lesson struct {
 	Time     string `yaml:"time"`
 	Day      int    `yaml:"day"`
 	Name     string `yaml:"name"`
@@ -93,7 +105,7 @@ func icsEnd() string {
 	return "END:VCALENDAR"
 }
 
-func icsEvent(start, end time.Time, c Class) string {
+func icsEvent(start, end time.Time, c lesson) string {
 	return fmt.Sprintf("BEGIN:VEVENT\nUID:%s\nDTSTAMP:19970714T170000Z\nDTSTART:%s\nDTEND:%s\nSUMMARY:%s\nLOCATION:%s\nDESCRIPTION:%s\nEND:VEVENT\n",
 		uuid.Must(uuid.NewV4()),
 		start.UTC().Format("20060102T150405Z"),
