@@ -1,23 +1,68 @@
 package main
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/satori/go.uuid"
+	// "html"
 	"io"
-	"os"
+	// "io/ioutil"
+	"net/http"
+	// "os"
+	"log"
 	"strings"
+	"time"
 )
 
 func main() {
-	f, err := os.Open("00000000000_XXX(学生课表).xls.exe")
-	if err != nil {
-		panic(err)
+	http.HandleFunc("/convert_schedule", scheduleParser)
+	http.HandleFunc("/upload", uploadDocument)
+	http.ListenAndServe(":1308", nil)
+	// f, err := os.Open("00000000000_XXX(学生课表).xls.exe")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// var data fullTable
+	// data.parse(f)
+	// j, err := json.Marshal(data)
+	// fmt.Println(string(j), err)
+	// ioutil.WriteFile("out.ics", []byte(data.toICS()), 0666)
+}
+
+func uploadDocument(rw http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	rw.Write([]byte(`<html>
+
+		<head></head>
+		
+		<body>
+			<form action="/convert_schedule" method="POST" enctype="multipart/form-data">
+				<input type="file" name="sch" />
+				<input type="submit" value="Convert" />
+			</form>
+		</body>
+		
+		</html>`))
+}
+
+func scheduleParser(rw http.ResponseWriter, r *http.Request) {
+	reader := http.MaxBytesReader(rw, r.Body, 100000)
+	defer reader.Close()
+	data := new(fullTable)
+	data.parse(reader)
+	if data.Error != nil {
+		log.Println(data.Error)
+		rw.WriteHeader(505)
+		return
 	}
-	var data fullTable
-	data.parse(f)
-	j, err := json.Marshal(data)
-	fmt.Println(string(j), err)
+
+	rw.Header().Set("Content-type", "application/octet-stream")
+	rw.Header().Set("Content-Disposition", "attachment;filename=yours.ics")
+	// log.Println(data.toICS())
+	if _, err := rw.Write([]byte(data.toICS())); err != nil {
+		log.Println(err)
+	}
 }
 
 type fullTable struct {
@@ -75,7 +120,7 @@ func (f *fullTable) parse(r io.Reader) {
 						for i := 0; i+5 < len(fe); i += 5 {
 							var c curri
 							c.Start = n
-							c.Day = j + 1
+							c.Day = j
 							fmt.Sscan(s.AttrOr("rowspan", "2"), &c.Duration) //课长
 							//单个课程占5行，把数据读取到结构体内
 							//0
@@ -85,7 +130,10 @@ func (f *fullTable) parse(r io.Reader) {
 							//4 (n-m 地址)
 							c.Name = strings.TrimSpace(fe[i+1])
 							c.Teacher = strings.Trim(fe[i+2], "( )")
-							fmt.Sscanf(strings.Trim(fe[i+4], "( )")+")", "%d-%d %s", &c.N, &c.M, &c.Loc)
+							plan := strings.Trim(fe[i+4], "( )") + ")"
+							if _, err := fmt.Sscanf(plan, "%d-%d %s", &c.N, &c.M, &c.Loc); err != nil {
+								fmt.Sscanf(plan, "%d %s", &c.N, &c.Loc)
+							}
 
 							// fmt.Println(c)
 							f.Curriculums = append(f.Curriculums, c)
@@ -104,4 +152,52 @@ func (f *fullTable) parse(r io.Reader) {
 	})
 
 	return
+}
+
+var (
+	//SchoolDay 定义学期开始第一天
+	SchoolDay = time.Date(2019, 3, 3, 0, 0, 0, 0, time.Local)
+	//Schedule 十一节课的时间表
+	Schedule = [11]struct{ start, end time.Duration }{
+		{time.Hour * 8, time.Hour*8 + time.Minute*50},
+		{time.Hour * 9, time.Hour*9 + time.Minute*50},
+		{time.Hour*10 + time.Minute*10, time.Hour * 11},
+		{time.Hour*11 + time.Minute*10, time.Hour * 12},
+		{time.Hour * 14, time.Hour*14 + time.Minute*50},
+		{time.Hour * 15, time.Hour*15 + time.Minute*50},
+		{time.Hour*16 + time.Minute*10, time.Hour * 17},
+		{time.Hour*17 + time.Minute*10, time.Hour * 18},
+		{time.Hour*19 + time.Minute*30, time.Hour*20 + time.Minute*20},
+		{time.Hour*20 + time.Minute*30, time.Hour*21 + time.Minute*20},
+		{time.Hour*21 + time.Minute*30, time.Hour*22 + time.Minute*20},
+	}
+	//DayName 是所有星期的简写
+	DayName = [7]string{"SU", "MO", "TU", "WE", "TH", "FR", "SA"}
+)
+
+func (f *fullTable) toICS() string {
+	sb := new(strings.Builder)
+	fmt.Fprintln(sb, "BEGIN:VCALENDAR")
+	fmt.Fprintln(sb, "VERSION:2.0")
+	fmt.Fprintln(sb, "PRODID:-//Tnze//YAML-iCalendar v1.0//CN")
+	for _, v := range f.Curriculums {
+		day := SchoolDay.AddDate(0, 0, v.Day+(v.N-1)*7)
+		start := day.Add(Schedule[v.Start-1].start)
+		end := day.Add(Schedule[v.Start-2+v.Duration].end)
+		fmt.Fprintf(sb, "BEGIN:VEVENT\nUID:%s\nDTSTAMP:%s\nDTSTART:%s\nDTEND:%s\nSUMMARY:%s\nLOCATION:%s\nDESCRIPTION:%s\n",
+			uuid.Must(uuid.NewV4()),
+			time.Now().Format("20060102T150405Z"),
+			start.UTC().Format("20060102T150405Z"),
+			end.UTC().Format("20060102T150405Z"),
+			v.Name,
+			v.Loc,
+			v.Teacher,
+		)
+		if v.M != 0 {
+			fmt.Fprintf(sb, "RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=%s;COUNT=%d\n", DayName[v.Day], 1+v.M-v.N)
+		}
+		fmt.Fprintln(sb, "END:VEVENT")
+	}
+	fmt.Fprintln(sb, "END:VCALENDAR")
+	return sb.String()
 }
