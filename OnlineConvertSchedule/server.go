@@ -1,33 +1,24 @@
 package main
 
 import (
-	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/satori/go.uuid"
-	// "html"
+	"html"
 	"io"
-	// "io/ioutil"
-	"net/http"
-	// "os"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 )
 
 func main() {
-	http.HandleFunc("/convert_schedule", scheduleParser)
+	http.HandleFunc("/convert_schedule_ics", convertToICS)
+	http.HandleFunc("/convert_schedule_json", convertToJSON)
 	http.HandleFunc("/upload", uploadDocument)
 	http.ListenAndServe(":1308", nil)
-	// f, err := os.Open("00000000000_XXX(学生课表).xls.exe")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// var data fullTable
-	// data.parse(f)
-	// j, err := json.Marshal(data)
-	// fmt.Println(string(j), err)
-	// ioutil.WriteFile("out.ics", []byte(data.toICS()), 0666)
 }
 
 func uploadDocument(rw http.ResponseWriter, r *http.Request) {
@@ -46,7 +37,7 @@ func uploadDocument(rw http.ResponseWriter, r *http.Request) {
 		</html>`))
 }
 
-func scheduleParser(rw http.ResponseWriter, r *http.Request) {
+func convertToICS(rw http.ResponseWriter, r *http.Request) {
 	reader := http.MaxBytesReader(rw, r.Body, 100000)
 	defer reader.Close()
 	data := new(fullTable)
@@ -59,8 +50,37 @@ func scheduleParser(rw http.ResponseWriter, r *http.Request) {
 
 	rw.Header().Set("Content-type", "application/octet-stream")
 	rw.Header().Set("Content-Disposition", "attachment;filename=yours.ics")
-	// log.Println(data.toICS())
-	if _, err := rw.Write([]byte(data.toICS())); err != nil {
+	if _, err := rw.Write([]byte(html.EscapeString(data.MarshalICS()))); err != nil {
+		log.Println(err)
+	}
+	j, err := json.Marshal(data)
+	if err != nil {
+		return
+	}
+	ioutil.WriteFile("log/"+uuid.Must(uuid.NewV4()).String()[:8]+".json", j, 0666)
+}
+
+func convertToJSON(rw http.ResponseWriter, r *http.Request) {
+	reader := http.MaxBytesReader(rw, r.Body, 100000)
+	defer reader.Close()
+	data := new(fullTable)
+	data.parse(reader)
+	if data.Error != nil {
+		log.Println(data.Error)
+		rw.WriteHeader(505)
+		return
+	}
+
+	rw.Header().Set("Content-type", "application/javascript")
+	j, err := json.Marshal(data)
+	if err != nil {
+		log.Println(data.Error)
+		rw.WriteHeader(505)
+		return
+	}
+
+	_, err = rw.Write(j)
+	if err != nil {
 		log.Println(err)
 	}
 }
@@ -175,11 +195,11 @@ var (
 	DayName = [7]string{"SU", "MO", "TU", "WE", "TH", "FR", "SA"}
 )
 
-func (f *fullTable) toICS() string {
+func (f *fullTable) MarshalICS() string {
 	sb := new(strings.Builder)
 	fmt.Fprintln(sb, "BEGIN:VCALENDAR")
 	fmt.Fprintln(sb, "VERSION:2.0")
-	fmt.Fprintln(sb, "PRODID:-//Tnze//YAML-iCalendar v1.0//CN")
+	fmt.Fprintln(sb, "PRODID:-//Tnze//XATU-iCalendar v1.0//CN")
 	for _, v := range f.Curriculums {
 		day := SchoolDay.AddDate(0, 0, v.Day+(v.N-1)*7)
 		start := day.Add(Schedule[v.Start-1].start)
