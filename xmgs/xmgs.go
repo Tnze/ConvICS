@@ -114,30 +114,44 @@ func parseTableInfo(s *goquery.Selection) {
 	})
 }
 
+// s.Text()中每节课的的形式如下
+//	0
+//	1 课程名 (编号)
+//	2 (教师)
+//	3
+//	4 (n-m 地址)
 var coursePat = regexp.MustCompile(`([^\s]+)\s+\(([^\s]+)\)\s+\(([^\s]+)\)\s+\(([^\s]+)\s+([^\s]+)\)`)
 
 func parseSchedule(s *goquery.Selection) {
+	isFull := make(map[[2]int]bool)
 	s.Find("tr").EachWithBreak(func(n int, s *goquery.Selection) bool {
 		s.Find("td").Each(func(j int, s *goquery.Selection) {
 			if j == 0 { // 第一行是第几节课
 				fmt.Printf("正在解析%q\n", strings.TrimSpace(s.Text()))
 			} else {
-				var duration int
-				_, _ = fmt.Sscan(s.AttrOr("rowspan", "2"), &duration) //课长
-				//单个课程占5行，把数据读取到结构体内
-				//0
-				//1 课程名 (编号)
-				//2 (教师)
-				//3
-				//4 (n-m 地址)
+				// 求当前课程在星期几
+				var w int
+				for isFull[[2]int{n, w}] {
+					w++
+				}
 
+				// 解析课长
+				var duration int
+				_, _ = fmt.Sscan(s.AttrOr("rowspan", "2"), &duration)
+
+				// 填写isFull表
+				for i := 0; i < duration; i++ {
+					isFull[[2]int{n + i, w}] = true
+				}
+
+				// 用正则表达式匹配每节课
 				ans := coursePat.FindAllStringSubmatch(s.Text(), -1)
 				for i := range ans {
 					if len(ans[i]) != 5 {
 						c := ans[i][1:]
 						// c = ["大学物理实验I" "0268.46" "邓晓颖" "2-9" "物理实验室(未央)"]
-						log.Printf("正在解析课程: [%d,%d]%s\n", n, j, c[0])
-						findCourse(n, duration, time.Weekday(j), c[0], c[1], c[2], c[3], c[4])
+						log.Printf("正在解析课程: [第%d周,星期%d]%s\n", n, w+1, c[0])
+						findCourse(n, duration, time.Weekday(w+1), c[0], c[1], c[2], c[3], c[4])
 					} else {
 						log.Fatalf("解析失败: %q\n", ans[i])
 					}
