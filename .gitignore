@@ -14,3 +14,5 @@ formart changed.xlsx
 ~$formart changed.xlsx
 src/.DS_Store
 OnlineConvertSchedule/server
+
+*.ics

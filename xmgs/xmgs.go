@@ -43,8 +43,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Println(schedule)
-	log.Println(ioutil.WriteFile("schedule.ics", schedule.ToICS(timetable), 0777))
+	err = ioutil.WriteFile("schedule.ics", schedule.ToICS(timetable), 0777)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func parse(doc *goquery.Document) (err error) {
@@ -127,7 +129,7 @@ func parseSchedule(s *goquery.Selection) {
 	s.Find("tr").EachWithBreak(func(n int, s *goquery.Selection) bool {
 		s.Find("td").Each(func(j int, s *goquery.Selection) {
 			if j == 0 { // 第一行是第几节课
-				fmt.Printf("正在解析%q\n", strings.TrimSpace(s.Text()))
+				//log.Printf("正在解析%q\n", strings.TrimSpace(s.Text()))
 			} else {
 				// 求当前课程在星期几
 				var w int
@@ -150,7 +152,6 @@ func parseSchedule(s *goquery.Selection) {
 					if len(ans[i]) != 5 {
 						c := ans[i][1:]
 						// c = ["大学物理实验I" "0268.46" "邓晓颖" "2-9" "物理实验室(未央)"]
-						log.Printf("正在解析课程: [第%d周,星期%d]%s\n", n, w+1, c[0])
 						findCourse(n, duration, time.Weekday(w+1), c[0], c[1], c[2], c[3], c[4])
 					} else {
 						log.Fatalf("解析失败: %q\n", ans[i])
@@ -163,7 +164,7 @@ func parseSchedule(s *goquery.Selection) {
 }
 
 func findCourse(n, duration int, weekday time.Weekday, name, id, teacher, time, loc string) {
-	log.Println(duration, name, id, teacher, time, loc)
+	log.Printf("课程[%d:%d][%s]%q(%s):\t<%s> {%s} \n", n, duration, time, name, id, teacher, loc)
 	UUID := uuid.NewSHA1(uuid.NameSpaceX500, []byte(id))
 
 	subject := schedule.Subjects[UUID]
