@@ -10,9 +10,7 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-formart changed.xlsx
-~$formart changed.xlsx
-src/.DS_Store
-OnlineConvertSchedule/server
-
 *.ics
+
+.idea/
+.DS_Store
