@@ -10,4 +10,4 @@
 
 学校 | 方式 | 链接
 -|-|-
-西安工业大学 | 转换从教务网导出的xls文件 | [xmgs](https://github.com/Tnze/ConvICS/tree/master/xmgs) |
+西安工业大学 | 转换从教务网导出的xls文件 | [xatu](https://github.com/Tnze/ConvICS/tree/master/xatu) |
