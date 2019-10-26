@@ -1,17 +1,18 @@
-// 解析教务网上导出的课程表
+// Usage: go run github.com/Tnze/ConvICS/xatu 12345678903_李小龙（学生课表）.xls
 package main
 
 import (
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/Tnze/ConvICS"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/Tnze/ConvICS"
+	"github.com/google/uuid"
 )
 
 var timetable ConvICS.Timetable
