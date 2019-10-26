@@ -9,3 +9,5 @@ go build github.com/Tnze/ConvICS/xatu
 ```
 3. 然后把课表.xls拖到生成的.exe文件上
 4. 双击.ics，用日历应用导入
+
+![image.png](https://i.loli.net/2019/10/26/Ar5RJ4uiT97YINP.png)
