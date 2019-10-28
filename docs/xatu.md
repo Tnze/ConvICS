@@ -26,7 +26,7 @@
         a.download = document.getElementById("input").files[0].name + ".ics";
         a.href = URL.createObjectURL(blob);
         document.body.appendChild(a);
-        // a.click();
+        a.click();
         document.body.removeChild(a);
     }
     function Show(info) {
@@ -41,6 +41,7 @@
             return r;
         }
         let it = document.getElementById("infotable");
+        it.innerHTML = "";
         it.appendChild(row("学年", info.year));
         it.appendChild(row("姓名", info.name));
         it.appendChild(row("学号", info.id));
