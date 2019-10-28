@@ -48,6 +48,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("生成ics文件成功")
 }
 
 func parse(doc *goquery.Document) (err error) {
