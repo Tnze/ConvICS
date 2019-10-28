@@ -1,5 +1,6 @@
 # Convert Calendar
 
+<script src="wasm_exec.js"></script>
 <script>
     if (!WebAssembly.instantiateStreaming) { // polyfill
         WebAssembly.instantiateStreaming = async (resp, importObject) => {
