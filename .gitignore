@@ -9,8 +9,12 @@
 *.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
-*.out
 *.ics
+*.out
+*.wasm
+
+!docs/wasm/*.wasm
 
 .idea/
+.vscode/
 .DS_Store

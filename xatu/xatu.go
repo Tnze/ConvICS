@@ -1,11 +1,8 @@
-// Usage: go run github.com/Tnze/ConvICS/xatu 12345678903_李小龙（学生课表）.xls
 package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -21,34 +18,6 @@ var beijing = time.FixedZone("Beijing Time", secondsEastOfUTC)
 var schedule = ConvICS.Schedule{
 	SemesterStart: time.Date(2019, 9, 1, 0, 0, 0, 0, beijing),
 	Subjects:      make(map[uuid.UUID][]ConvICS.Subject),
-}
-
-func main() {
-	if len(os.Args) < 2 {
-		log.Fatal("please appoint input file")
-	}
-
-	// open file
-	f, err := os.Open(os.Args[1])
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	doc, err := goquery.NewDocumentFromReader(f)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = parse(doc)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = ioutil.WriteFile("schedule.ics", schedule.ToICS(timetable), 0777)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("生成ics文件成功")
 }
 
 func parse(doc *goquery.Document) (err error) {
