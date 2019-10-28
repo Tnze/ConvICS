@@ -12,15 +12,15 @@ import (
 	"github.com/google/uuid"
 )
 
-var timetable ConvICS.Timetable
 var secondsEastOfUTC = int((8 * time.Hour).Seconds())
 var beijing = time.FixedZone("Beijing Time", secondsEastOfUTC)
-var schedule = ConvICS.Schedule{
-	SemesterStart: time.Date(2019, 9, 1, 0, 0, 0, 0, beijing),
-	Subjects:      make(map[uuid.UUID][]ConvICS.Subject),
+
+// TableInfo 表示课表中的个人信息
+type TableInfo struct {
+	Year, ID, Name, Class, Score string
 }
 
-func parse(doc *goquery.Document) (err error) {
+func parse(doc *goquery.Document) (info TableInfo, timetable ConvICS.Timetable, schedule ConvICS.Schedule, err error) {
 	defer func() {
 		if Err := recover(); Err != nil {
 			err = Err.(error)
@@ -31,17 +31,17 @@ func parse(doc *goquery.Document) (err error) {
 	doc.Find("table").Each(func(i int, s *goquery.Selection) {
 		switch i {
 		case 0: //课表信息info
-			parseTableInfo(s)
+			info = parseTableInfo(s)
 		case 1: //课表当前列
-			parseSchedule(s)
+			schedule = parseSchedule(s)
 		case 3:
-			parseTimetable(s)
+			timetable = parseTimetable(s)
 		}
 	})
 	return
 }
 
-func parseTimetable(s *goquery.Selection) {
+func parseTimetable(s *goquery.Selection) (tt ConvICS.Timetable) {
 	s.Find("tr").Each(func(i int, s *goquery.Selection) {
 		if i < 3 { // 前面的不是我们校区
 			return
@@ -65,26 +65,28 @@ func parseTimetable(s *goquery.Selection) {
 			end := time.Hour*time.Duration(eh) + time.Minute*time.Duration(em)
 
 			log.Printf("解析成功: %q 课: 从%d:%d到%d:%d", desc, sh, sm, eh, em)
-			timetable.Append(desc, start, end) // 添加到Timetable
+			tt.Append(desc, start, end) // 添加到Timetable
 		})
 	})
+	return
 }
 
-func parseTableInfo(s *goquery.Selection) {
+func parseTableInfo(s *goquery.Selection) (t TableInfo) {
 	n := s.Find("tr > td")
 	n.Each(func(i int, s *goquery.Selection) {
 		switch i {
 		case 1:
-			log.Println("解析成功: 学期", s.Text())
+			t.Year = s.Text() // 学年
 		case 2:
-			field := strings.Fields(s.Text())
+			fields := strings.Fields(s.Text())
 
-			log.Println("解析成功: 学号: ", strings.TrimPrefix(field[0], "学号:"))
-			log.Println("解析成功: 姓名: ", strings.TrimPrefix(field[1], "学生姓名:"))
-			log.Println("解析成功: 班级: ", field[3])
-			log.Println("解析成功: 学分: ", strings.TrimPrefix(field[4], "总学分:"))
+			t.ID = strings.TrimPrefix(fields[0], "学号:")
+			t.Name = strings.TrimPrefix(fields[1], "学生姓名:")
+			t.Class = fields[3]
+			t.Score = strings.TrimPrefix(fields[4], "总学分:")
 		}
 	})
+	return
 }
 
 // s.Text()中每节课的的形式如下
@@ -95,7 +97,12 @@ func parseTableInfo(s *goquery.Selection) {
 //	4 (n-m 地址)
 var coursePat = regexp.MustCompile(`([^\s]+)\s+\(([^\s]+)\)\s+\(([^\s]+)\)\s+\(([^\s]+)\s+([^\s]+)\)`)
 
-func parseSchedule(s *goquery.Selection) {
+func parseSchedule(s *goquery.Selection) (schedule ConvICS.Schedule) {
+	schedule = ConvICS.Schedule{
+		SemesterStart: time.Date(2019, 9, 1, 0, 0, 0, 0, beijing),
+		Subjects:      make(map[uuid.UUID][]ConvICS.Subject),
+	}
+
 	isFull := make(map[[2]int]bool)
 	s.Find("tr").EachWithBreak(func(n int, s *goquery.Selection) bool {
 		s.Find("td").Each(func(j int, s *goquery.Selection) {
@@ -123,7 +130,7 @@ func parseSchedule(s *goquery.Selection) {
 					if len(ans[i]) != 5 {
 						c := ans[i][1:]
 						// c = ["大学物理实验I" "0268.46" "邓晓颖" "2-9" "物理实验室(未央)"]
-						findCourse(n, duration, time.Weekday(w+1), c[0], c[1], c[2], c[3], c[4])
+						findCourse(&schedule, n, duration, time.Weekday(w+1), c[0], c[1], c[2], c[3], c[4])
 					} else {
 						log.Fatalf("解析失败: %q\n", ans[i])
 					}
@@ -132,9 +139,10 @@ func parseSchedule(s *goquery.Selection) {
 		})
 		return true
 	})
+	return
 }
 
-func findCourse(n, duration int, weekday time.Weekday, name, id, teacher, time, loc string) {
+func findCourse(schedule *ConvICS.Schedule, n, duration int, weekday time.Weekday, name, id, teacher, time, loc string) {
 	log.Printf("课程[%d:%d][%s]%q(%s):\t<%s> {%s} \n", n, duration, time, name, id, teacher, loc)
 	UUID := uuid.NewSHA1(uuid.NameSpaceX500, []byte(id))
 

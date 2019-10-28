@@ -28,14 +28,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = parse(doc)
+	info, timetable, schedule, err := parse(doc)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("%#v", info)
 
 	err = ioutil.WriteFile("schedule.ics", schedule.ToICS(timetable), 0777)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("create .ics success")
+	log.Println("create .ics file success")
 }

@@ -30,13 +30,33 @@ func convert(this js.Value, args []js.Value) interface{} {
 	}
 
 	// 提取课表
-	err = parse(doc)
+	info, timetable, schedule, err := parse(doc)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// 生成ics
-	schedule.ToICS(timetable)
+	ics := schedule.ToICS(timetable)
+	if len(args) >= 2 && args[1].Type() == js.TypeFunction {
+		data := js.Global().Get("Uint8Array").New(js.ValueOf(len(ics)))
+		js.CopyBytesToJS(data, ics)
+		args[1].Invoke(data)
+	} else {
+		fmt.Print("ignored the ics")
+	}
+
+	// 返回课表信息
+	if len(args) >= 3 && args[2].Type() == js.TypeFunction {
+		args[2].Invoke(map[string]interface{}{
+			"year":  info.Year,
+			"id":    info.ID,
+			"name":  info.Name,
+			"class": info.Class,
+			"score": info.Score,
+		})
+	} else {
+		fmt.Print("ignored the tableinfo")
+	}
 
 	return nil
 }
