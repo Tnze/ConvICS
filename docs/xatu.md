@@ -49,7 +49,7 @@
 </script>
 
 <input type="file" id="input">
-<br><input type="button" id="Run" value="output" onclick="Convert()" disabled>
+<br><input type="button" id="output" value="Run" onclick="Convert()" disabled>
 <table id="infotable"></table>
 
 请稍等，加载转换器可能需要一段时间，完成后上面的按钮就会变得可用。
