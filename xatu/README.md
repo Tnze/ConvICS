@@ -1,6 +1,10 @@
 # XATU
 把教务网导出的xls文件转成.ics
 
+## 在线工具
+http://tnze.github.io/ConvICS/xatu
+
+## 手动操作
 1. 安装[go编译器](https://golang.google.cn/)
 2. 编译程序
 ```
