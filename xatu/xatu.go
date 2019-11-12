@@ -20,6 +20,7 @@ type TableInfo struct {
 	Year, ID, Name, Class, Score string
 }
 
+// BUG(Tnze) 由于课表表格表示能力问题，如果两节课同在一天同一时段（在周数不同的情况下是可能发生的），而两节课的长度不同，则短的课节数会出错。
 func parse(doc *goquery.Document) (info TableInfo, timetable ConvICS.Timetable, schedule ConvICS.Schedule, err error) {
 	defer func() {
 		if Err := recover(); Err != nil {
@@ -130,7 +131,7 @@ func parseSchedule(s *goquery.Selection) (schedule ConvICS.Schedule) {
 					if len(ans[i]) != 5 {
 						c := ans[i][1:]
 						// c = ["大学物理实验I" "0268.46" "邓晓颖" "2-9" "物理实验室(未央)"]
-						findCourse(&schedule, n, duration, time.Weekday(w+1), c[0], c[1], c[2], c[3], c[4])
+						findCourse(&schedule, n, duration, time.Weekday(w+1)%7, c[0], c[1], c[2], c[3], c[4])
 					} else {
 						log.Fatalf("解析失败: %q\n", ans[i])
 					}

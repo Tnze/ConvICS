@@ -1,9 +1,10 @@
 package ConvICS
 
 import (
-	"github.com/arran4/golang-ical"
-	"github.com/google/uuid"
 	"time"
+
+	ics "github.com/arran4/golang-ical"
+	"github.com/google/uuid"
 )
 
 func (s Schedule) ToICS(t Timetable) []byte {

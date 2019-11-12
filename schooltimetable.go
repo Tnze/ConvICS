@@ -1,8 +1,9 @@
 package ConvICS
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // Timetable 是一天的时间表，规定了每天每节课的上课下课时间
@@ -24,6 +25,6 @@ type Subject struct {
 	Teacher      string
 	Location     string
 	Weekday      time.Weekday
-	Start, End   int // 周
-	CStart, CEnd int // 天
+	Start, End   int // 第[Start, End]周，从1开始
+	CStart, CEnd int // 第[CStart, CEnd]节课，从1开始
 }
