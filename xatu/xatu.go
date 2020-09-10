@@ -35,7 +35,7 @@ func parse(doc *goquery.Document) (info TableInfo, timetable ConvICS.Timetable, 
 			info = parseTableInfo(s)
 		case 1: //课表当前列
 			schedule = parseSchedule(s)
-		case 3:
+		case 2:
 			timetable = parseTimetable(s)
 		}
 	})
@@ -100,7 +100,7 @@ var coursePat = regexp.MustCompile(`([^\s]+)\s+\(([^\s]+)\)\s+\(([^\s]+)\)\s+\((
 
 func parseSchedule(s *goquery.Selection) (schedule ConvICS.Schedule) {
 	schedule = ConvICS.Schedule{
-		SemesterStart: time.Date(2019, 9, 1, 0, 0, 0, 0, beijing),
+		SemesterStart: time.Date(2020, 8, 30, 0, 0, 0, 0, beijing),
 		Subjects:      make(map[uuid.UUID][]ConvICS.Subject),
 	}
 
