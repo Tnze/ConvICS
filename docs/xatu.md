@@ -53,5 +53,7 @@
 <br><input type="button" id="output" value="Run" onclick="Convert()" disabled>
 <table id="infotable"></table>
 
+更新时间：2021/03/03
+
 请稍等，加载转换器可能需要一段时间，完成后上面的按钮就会变得可用。
 选择从教务网导出的.xls格式课表，点击`Run`按钮，将其转换为.ics文件。转换在浏览器端完成，你的课表将**不会**被上传。

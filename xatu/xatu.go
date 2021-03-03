@@ -100,7 +100,7 @@ var coursePat = regexp.MustCompile(`([^\s]+)\s+\(([^\s]+)\)\s+\(([^\s]+)\)\s+\((
 
 func parseSchedule(s *goquery.Selection) (schedule ConvICS.Schedule) {
 	schedule = ConvICS.Schedule{
-		SemesterStart: time.Date(2020, 8, 30, 0, 0, 0, 0, beijing),
+		SemesterStart: time.Date(2021, 2, 28, 0, 0, 0, 0, beijing),
 		Subjects:      make(map[uuid.UUID][]ConvICS.Subject),
 	}
 
